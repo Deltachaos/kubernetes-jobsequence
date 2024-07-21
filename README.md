@@ -30,21 +30,23 @@ metadata:
   namespace: default
 data:
   job1.yaml: |
-    template:
-      spec:
-        restartPolicy: Never
-        containers:
-          - name: sleep-container
-            image: busybox
-            command: ["sleep", "10"]
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: sleep-container
+              image: busybox
+              command: ["sleep", "10"]
   job2.yaml: |
-    template:
-      spec:
-        restartPolicy: Never
-        containers:
-          - name: sleep-container
-            image: busybox
-            command: ["sleep", "20"]
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: sleep-container
+              image: busybox
+              command: ["sleep", "20"]
 ---
 apiVersion: batch/v1
 kind: Job
