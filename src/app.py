@@ -49,6 +49,14 @@ def read_job_files_from_directory(directory):
                 job_files.append(file.read())
     return job_files
 
+def get_job_name_from_pod(namespace, pod_name):
+    v1 = client.CoreV1Api()
+    pod = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
+    for owner in pod.metadata.owner_references:
+        if owner.kind == 'Job':
+            return owner.name
+    return None
+
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info("Starting the job sequence script.")
@@ -56,10 +64,14 @@ def main():
     config.load_incluster_config()
     namespace = os.getenv('NAMESPACE', 'default')
     configmap_name = os.getenv('JOB_CONFIGMAP')
-    job_name_env = "job"
-
-    if os.getenv('JOB_NAME'):
-      job_name_env = os.getenv('JOB_NAME')
+    job_name_env = os.getenv('JOB_NAME')
+    
+    if not job_name_env:
+        pod_name = get_pod_name()
+        job_name_env = get_job_name_from_pod(namespace, pod_name)
+        if not job_name_env:
+            logging.error("Could not determine the job name from the pod metadata and JOB_NAME is not set.")
+            exit(1)
 
     v1 = client.CoreV1Api()
 
