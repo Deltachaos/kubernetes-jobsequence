@@ -72,8 +72,14 @@ def main():
         yaml_definition = queue.pop(0)
         job_definition = yaml.safe_load(yaml_definition)
 
-        # Create a configmap for job results
         result_configmap_name = f"{job_name_env}-{generate_random_suffix()}"
+
+        if 'metadata' not in job_definition:
+            job_definition['metadata'] = {}
+
+        job_definition['metadata']['name'] = result_configmap_name
+        
+        # Create a configmap for job results
         logging.info(f"Creating result configmap: {result_configmap_name}")
         create_configmap(namespace, result_configmap_name, data={})
 
