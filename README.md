@@ -32,19 +32,19 @@ data:
   job1.yaml: |
     template:
       spec:
+        restartPolicy: Never
         containers:
           - name: sleep-container
             image: busybox
             command: ["sleep", "10"]
-          restartPolicy: Never
   job2.yaml: |
     template:
       spec:
+        restartPolicy: Never
         containers:
           - name: sleep-container
             image: busybox
             command: ["sleep", "20"]
-          restartPolicy: Never
 ---
 apiVersion: batch/v1
 kind: Job
