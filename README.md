@@ -61,7 +61,7 @@ spec:
             name: do-subjobs
       containers:
         - name: runner
-          image: ghcr.io/deltachaos/kubernetes-jobsequence
+          image: ghcr.io/deltachaos/kubernetes-jobsequence:main
           volumeMounts:
             - name: jobs
               mountPath: /jobs
