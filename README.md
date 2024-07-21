@@ -63,6 +63,7 @@ spec:
             name: do-subjobs
       containers:
         - name: runner
+          imagePullPolicy: Always
           image: ghcr.io/deltachaos/kubernetes-jobsequence:main
           volumeMounts:
             - name: jobs
