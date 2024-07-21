@@ -49,6 +49,9 @@ def read_job_files_from_directory(directory):
                 job_files.append(file.read())
     return job_files
 
+def get_pod_name():
+    return os.getenv('HOSTNAME')
+
 def get_job_name_from_pod(namespace, pod_name):
     v1 = client.CoreV1Api()
     pod = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
