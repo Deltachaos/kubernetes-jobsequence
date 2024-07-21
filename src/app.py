@@ -86,6 +86,9 @@ def main():
         logging.info(f"Creating result configmap: {result_configmap_name}")
         create_configmap(namespace, result_configmap_name, data={})
 
+        if 'env' not in job_definition['spec']['template']['spec']['containers'][0]:
+            job_definition['spec']['template']['spec']['containers'][0]['env'] = {}
+        
         # Modify job definition to include the result configmap
         job_definition['spec']['template']['spec']['containers'][0]['env'].append(
             client.V1EnvVar(name='JOBSEQUENCE_RESULT_CONFIGMAP', value=result_configmap_name)
