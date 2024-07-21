@@ -56,10 +56,10 @@ def main():
     config.load_incluster_config()
     namespace = os.getenv('NAMESPACE', 'default')
     configmap_name = os.getenv('JOB_CONFIGMAP')
-    job_name_env = os.getenv('JOB_NAME')
+    job_name_env = "job"
 
-    if not job_name_env:
-        job_name_env = "job"
+    if os.getenv('JOB_NAME'):
+      job_name_env = os.getenv('JOB_NAME')
 
     v1 = client.CoreV1Api()
 
