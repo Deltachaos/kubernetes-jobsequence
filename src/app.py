@@ -114,9 +114,10 @@ def main():
         if not job_succeeded:
             logging.error("Exiting due to job failure.")
             exit(1)
-
-        # Add items to the queue
-        queue.extend(result_configmap_data.values())
+        
+        if result_configmap_data:
+            # Add items to the queue
+            queue.extend(result_configmap_data.values())
 
     logging.info("Job sequence script completed.")
 
