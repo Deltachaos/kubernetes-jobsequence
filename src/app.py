@@ -58,6 +58,9 @@ def main():
     configmap_name = os.getenv('JOB_CONFIGMAP')
     job_name_env = os.getenv('JOB_NAME')
 
+    if not job_name_env:
+        job_name_env = "job"
+
     v1 = client.CoreV1Api()
 
     if configmap_name:
