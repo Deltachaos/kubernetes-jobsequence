@@ -87,7 +87,7 @@ def main():
         create_configmap(namespace, result_configmap_name, data={})
 
         if 'env' not in job_definition['spec']['template']['spec']['containers'][0]:
-            job_definition['spec']['template']['spec']['containers'][0]['env'] = {}
+            job_definition['spec']['template']['spec']['containers'][0]['env'] = []
         
         # Modify job definition to include the result configmap
         job_definition['spec']['template']['spec']['containers'][0]['env'].append(
