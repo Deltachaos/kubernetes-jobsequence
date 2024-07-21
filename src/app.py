@@ -9,9 +9,9 @@ from kubernetes import client, config
 def generate_random_suffix(length=6):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
-def create_configmap(namespace, name, data):
+def create_configmap(namespace, name, data, owner_references):
     v1 = client.CoreV1Api()
-    metadata = client.V1ObjectMeta(name=name)
+    metadata = client.V1ObjectMeta(name=name, owner_references=owner_references)
     configmap = client.V1ConfigMap(metadata=metadata, data=data)
     return v1.create_namespaced_config_map(namespace=namespace, body=configmap)
 
@@ -19,7 +19,8 @@ def delete_configmap(namespace, name):
     v1 = client.CoreV1Api()
     return v1.delete_namespaced_config_map(name=name, namespace=namespace)
 
-def create_job(namespace, job_definition):
+def create_job(namespace, job_definition, owner_references):
+    job_definition['metadata']['ownerReferences'] = owner_references
     batch_v1 = client.BatchV1Api()
     return batch_v1.create_namespaced_job(namespace=namespace, body=job_definition)
 
@@ -60,6 +61,11 @@ def get_job_name_from_pod(namespace, pod_name):
             return owner.name
     return None
 
+def get_owner_references_from_pod(namespace, pod_name):
+    v1 = client.CoreV1Api()
+    pod = v1.read_namespaced_pod(name=pod_name, namespace=namespace)
+    return pod.metadata.owner_references
+
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info("Starting the job sequence script.")
@@ -68,9 +74,11 @@ def main():
     namespace = os.getenv('NAMESPACE', 'default')
     configmap_name = os.getenv('JOB_CONFIGMAP')
     job_name_env = os.getenv('JOB_NAME')
-    
+
+    pod_name = get_pod_name()
+    owner_references = get_owner_references_from_pod(namespace, pod_name)
+
     if not job_name_env:
-        pod_name = get_pod_name()
         job_name_env = get_job_name_from_pod(namespace, pod_name)
         if not job_name_env:
             logging.error("Could not determine the job name from the pod metadata and JOB_NAME is not set.")
@@ -99,7 +107,7 @@ def main():
         
         # Create a configmap for job results
         logging.info(f"Creating result configmap: {result_configmap_name}")
-        create_configmap(namespace, result_configmap_name, data={})
+        create_configmap(namespace, result_configmap_name, data={}, owner_references=owner_references)
 
         if 'env' not in job_definition['spec']['template']['spec']['containers'][0]:
             job_definition['spec']['template']['spec']['containers'][0]['env'] = []
@@ -111,7 +119,7 @@ def main():
 
         # Create the job
         logging.info(f"Creating job: {job_definition['metadata']['name']}")
-        job = create_job(namespace, job_definition)
+        job = create_job(namespace, job_definition, owner_references)
         job_name = job.metadata.name
 
         # Wait for the job to complete
