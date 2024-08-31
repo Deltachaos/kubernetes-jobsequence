@@ -6,6 +6,11 @@ import time
 import logging
 from kubernetes import client, config
 
+def get_current_namespace():
+    with open("/var/run/secrets/kubernetes.io/serviceaccount/namespace", "r") as file:
+        namespace = file.read().strip()
+    return namespace
+
 def generate_random_suffix(length=6):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
@@ -71,7 +76,7 @@ def main():
     logging.info("Starting the job sequence script.")
 
     config.load_incluster_config()
-    namespace = os.getenv('NAMESPACE', 'default')
+    namespace = get_current_namespace()
     configmap_name = os.getenv('JOB_CONFIGMAP')
     job_name_env = os.getenv('JOB_NAME')
 
